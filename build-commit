@@ -139,28 +139,28 @@ if [ ! -e "${BUILDDIR}/deps-win/gc-7.2" ]; then
 	tar -zxvf "${DEPSDIR}/gc-7.2e.tar.gz" -C "${BUILDDIR}/deps-win/" ;
 fi
 
-if [ ! -e "${BUILDDIR}/deps-win/gettext-0.19.7" ]; then
-	tar -zxvf "${DEPSDIR}/gettext-latest.tar.gz" -C "${BUILDDIR}/deps-win/" ;
+if [ ! -e "${BUILDDIR}/deps-win/gettext-0.20.2" ]; then
+	tar -zxvf "${DEPSDIR}/gettext-0.20.2.tar.xz" -C "${BUILDDIR}/deps-win/" ;
 fi
 
-if [ ! -e "${BUILDDIR}/deps-win/gmp-6.1.0" ]; then
-	tar -xvf "${DEPSDIR}/gmp-6.1.0.tar.lz" -C "${BUILDDIR}/deps-win/" ;
+if [ ! -e "${BUILDDIR}/deps-win/gmp-6.2.1" ]; then
+	tar -xvf "${DEPSDIR}/gmp-6.2.1.tar.bz2" -C "${BUILDDIR}/deps-win/" ;
 fi
 
 if [ ! -e "${BUILDDIR}/deps-win/libffi-3.2.1" ]; then
 	tar -zxvf "${DEPSDIR}/libffi-3.2.1.tar.gz" -C "${BUILDDIR}/deps-win/" ;
 fi
 
-if [ ! -e "${BUILDDIR}/deps-win/libiconv-1.14" ]; then
-	tar -zxvf "${DEPSDIR}/libiconv-1.14.tar.gz" -C "${BUILDDIR}/deps-win/" ;
+if [ ! -e "${BUILDDIR}/deps-win/libiconv-1.17" ]; then
+	tar -zxvf "${DEPSDIR}/libiconv-1.17.tar.gz" -C "${BUILDDIR}/deps-win/" ;
 fi
 
 if [ ! -e "${BUILDDIR}/deps-win/libtool-2.4.6" ]; then
 	tar -zxvf "${DEPSDIR}/libtool-2.4.6.tar.gz" -C "${BUILDDIR}/deps-win/" ;
 fi
 
-if [ ! -e "${BUILDDIR}/deps-win/libunistring-0.9.5" ]; then
-	tar -xvf "${DEPSDIR}/libunistring-0.9.5.tar.xz" -C "${BUILDDIR}/deps-win/" ;
+if [ ! -e "${BUILDDIR}/deps-win/libunistring-1.1" ]; then
+	tar -xvf "${DEPSDIR}/libunistring-1.1.tar.xz" -C "${BUILDDIR}/deps-win/" ;
 fi
 
 #create install directory
@@ -179,7 +179,7 @@ cd "${BUILDDIR}/deps-shared/texinfo-4.13"
 if [ ! -e "Makefile" ]; then
 	./configure --without-libiconv-prefix --prefix "${BUILDDIR}/deps-shared/bins" ;
 fi
-make && make install
+make -j8 && make install
 if [ $? -ne 0 ] ; then
 	printf "\nError while building texinfo. Aborting.\n" ;
 	exit 1 ;
@@ -193,7 +193,7 @@ TEXI2DVI="${BUILDDIR}/deps-shared/bins/bin/texi2dvi"
 TEXI2PDF="${TEXI2DVI} --pdf --batch"
 
 #build libiconv (no deps)
-cd "${BUILDDIR}/deps-win/libiconv-1.14"
+cd "${BUILDDIR}/deps-win/libiconv-1.17"
 if [ ! -e "Makefile" ]; then
 	./configure --host=${HOST_CC} --enable-static --disable-rpath --prefix "${PREFIX}" CFLAGS="${LIBICONV_CFLAGS}" LDFLAGS="${WIN_LDFLAGS}" CXXFLAGS="${WIN_CXXFLAGS}" ;
 	if [ $? -ne 0 ] ; then
@@ -201,7 +201,7 @@ if [ ! -e "Makefile" ]; then
 		exit 1 ;
 	fi
 fi
-make && make install
+make -j8 && make install
 if [ $? -ne 0 ] ; then
 	printf "\nError while building libiconv. Aborting.\n" ;
 	exit 1 ;
@@ -209,20 +209,27 @@ fi
 
 
 #build libgmp (no deps)
-cd "${BUILDDIR}/deps-win/gmp-6.1.0"
+export CC=x86_64-w64-mingw32-gcc
+export CC_FOR_BUILD=x86_64-linux-gnu-gcc
+export BUILD=x86_64-pc-linux-gnu
+
+cd "${BUILDDIR}/deps-win/gmp-6.2.1"
 if [ ! -e "Makefile" ]; then
-	./configure --host="${HOST_CC}" --enable-static --disable-rpath --prefix "${PREFIX}" CFLAGS="${WIN_CFLAGS}" LDFLAGS="${WIN_LDFLAGS}" CXXFLAGS="${WIN_CXXFLAGS}" ;
+	./configure --host="${HOST_CC}" --build="${BUILD}" --enable-static --disable-rpath --prefix "${PREFIX}" CFLAGS="${WIN_CFLAGS}" LDFLAGS="${WIN_LDFLAGS}" CXXFLAGS="${WIN_CXXFLAGS}" ;
 	if [ $? -ne 0 ] ; then
 		printf "\nError while configuring libgmp. Aborting.\n" ;
 		exit 1 ;
 	fi
 fi
-make && make install
+make -j8 && make install
 if [ $? -ne 0 ] ; then
 	printf "\nError while building libgmp. Aborting.\n" ;
 	exit 1 ;
 fi
 
+export CC=
+export CC_FOR_BUILD=
+export BUILD=
 
 #build libffi (no deps)
 cd "${BUILDDIR}/deps-win/libffi-3.2.1"
@@ -233,7 +240,7 @@ if [ ! -e "Makefile" ]; then
 		exit 1 ;
 	fi
 fi
-make && make install
+make -j8 && make install
 if [ $? -ne 0 ] ; then
 	printf "Error while building libffi. Aborting.\n" ;
 	exit 1 ;
@@ -251,31 +258,38 @@ if [ ! -e "Makefile" ]; then
 		exit 1 ;
 	fi
 fi
-make && make install
+make -j8 && make install
 if [ $? -ne 0 ] ; then
 	printf "\nError while building libtool / libltdl. Aborting.\n" ;
 	exit 1 ;
 fi
 
-
 #build libunistring (depends on libiconv)
-cd "${BUILDDIR}/deps-win/libunistring-0.9.5"
+#export CC=x86_64-w64-mingw32-gcc
+#export CC_FOR_BUILD=x86_64-linux-gnu-gcc
+#export CPP_FOR_BUILD=x86_64-linux-gnu-cpp
+export BUILD=x86_64-pc-linux-gnu
+
+cd "${BUILDDIR}/deps-win/libunistring-1.1"
 if [ ! -e "Makefile" ]; then
-	./configure --host="${HOST_CC}" --enable-static --disable-rpath --prefix "${PREFIX}" CFLAGS="${WIN_CFLAGS}" LDFLAGS="${WIN_LDFLAGS}" CXXFLAGS="${WIN_CXXFLAGS}" ;
+	./configure --host="${HOST_CC}" --build="${BUILD}" --enable-static --disable-rpath --prefix "${PREFIX}" --with-libiconv-prefix="${PREFIX}" CFLAGS="${WIN_CFLAGS}" LDFLAGS="${WIN_LDFLAGS}" CXXFLAGS="${WIN_CXXFLAGS}" ;
 	if [ $? -ne 0 ] ; then
 		printf "\nError while configuring libunistring. Aborting.\n" ;
 		exit 1 ;
 	fi
 fi
-make && make install
+make -j8 && make install
 if [ $? -ne 0 ] ; then
 	printf "\nError while building libunistring. Aborting.\n" ;
 	exit 1 ;
 fi
 
+export CC=
+export CC_FOR_BUILD=
+export BUILD=
 
 #build gettext / libintl / libasprintf (depends on libiconv, libunistring)
-cd "${BUILDDIR}/deps-win/gettext-0.19.7"
+cd "${BUILDDIR}/deps-win/gettext-0.20.2"
 if [ ! -e "Makefile" ]; then
 	./configure --host="${HOST_CC}" --disable-threads --enable-static --disable-rpath --prefix "${PREFIX}" CFLAGS="${WIN_CFLAGS} -O2" LDFLAGS="${WIN_LDFLAGS}" CXXFLAGS="${WIN_CXXFLAGS} -O2" ;
 	if [ $? -ne 0 ] ; then
@@ -283,7 +297,7 @@ if [ ! -e "Makefile" ]; then
 		exit 1 ;
 	fi
 fi
-make && make install
+make -j8 && make install
 if [ $? -ne 0 ] ; then
 	printf "\nError while building gettext / libintl. Aborting.\n" ;
 	exit 1 ;
@@ -299,7 +313,7 @@ if [ ! -e "Makefile" ]; then
 		exit 1 ;
 	fi
 fi
-make && make install
+make -j8 && make install
 if [ $? -ne 0 ] ; then
 	printf "\nError while building libatomic_ops. Aborting.\n" ;
 	exit 1 ;
@@ -366,7 +380,7 @@ MAKEINFO="${MAKEINFO}" TEXI2DVI="${TEXI2DVI}" ;
 		exit 1 ;
 	fi
 fi
-make
+make -j8
 if [ $? -ne 0 ] ; then
 	printf "\nError while building linux guile. Aborting.\n" ;
 	exit 1 ;

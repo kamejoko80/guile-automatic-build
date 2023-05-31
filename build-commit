@@ -393,7 +393,7 @@ if [ -e "GNUmakefile" ]; then
 	printf "\n./configure already run. Skipping.\n" ;
 	sleep 2 ;
 else
-	../configure --host="${HOST_CC}" --prefix="${PREFIX}/guile" --enable-static=yes --enable-shared=no --disable-rpath --enable-debug-malloc --enable-guile-debug \
+	../configure --host="${HOST_CC}" --prefix="${PREFIX}/guile" --enable-static=yes --enable-shared=no --disable-rpath --disable-jit --enable-debug-malloc --enable-guile-debug \
 --disable-deprecated --with-sysroot="${PREFIX}" --without-threads PKG_CONFIG=true BDW_GC_CFLAGS="-I${PREFIX}/include" BDW_GC_LIBS="-L${PREFIX}/lib -lgc" \
 LIBFFI_CFLAGS="-I${PREFIX}/include" LIBFFI_LIBS="-L${PREFIX}/lib -lffi" CC_FOR_BUILD=gcc \
 GUILE_FOR_BUILD="$BUILDDIR/build-linux/meta/guile" \

@@ -5,7 +5,7 @@ HOST_CC=${2-"x86_64-w64-mingw32"}
 COMMIT=$1
 GUILE_AUTOMATIC_BASE_DIR="$PWD"
 PREFIX="${GUILE_AUTOMATIC_BASE_DIR}/binaries/guile-${HOST_CC}-${COMMIT}"
-WIN_CFLAGS="-I${PREFIX}/include"
+WIN_CFLAGS="-I${PREFIX}/include -I${PREFIX}/lib/libffi-3.2.1/include"
 LIBICONV_CFLAGS="${WIN_CFLAGS} --std=gnu89"
 WIN_CXXFLAGS="-I${PREFIX}/include"
 WIN_LDFLAGS="-L${PREFIX}/lib"

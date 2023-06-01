@@ -151,8 +151,8 @@ if [ ! -e "${BUILDDIR}/deps-win/libffi-3.2.1" ]; then
 	tar -zxvf "${DEPSDIR}/libffi-3.2.1.tar.gz" -C "${BUILDDIR}/deps-win/" ;
 fi
 
-if [ ! -e "${BUILDDIR}/deps-win/libiconv-1.17" ]; then
-	tar -zxvf "${DEPSDIR}/libiconv-1.17.tar.gz" -C "${BUILDDIR}/deps-win/" ;
+if [ ! -e "${BUILDDIR}/deps-win/libiconv-1.14" ]; then
+	tar -zxvf "${DEPSDIR}/libiconv-1.14.tar.gz" -C "${BUILDDIR}/deps-win/" ;
 fi
 
 if [ ! -e "${BUILDDIR}/deps-win/libtool-2.4.6" ]; then
@@ -193,7 +193,7 @@ TEXI2DVI="${BUILDDIR}/deps-shared/bins/bin/texi2dvi"
 TEXI2PDF="${TEXI2DVI} --pdf --batch"
 
 #build libiconv (no deps)
-cd "${BUILDDIR}/deps-win/libiconv-1.17"
+cd "${BUILDDIR}/deps-win/libiconv-1.14"
 if [ ! -e "Makefile" ]; then
 	./configure --host=${HOST_CC} --enable-static --disable-rpath --prefix "${PREFIX}" CFLAGS="${LIBICONV_CFLAGS}" LDFLAGS="${WIN_LDFLAGS}" CXXFLAGS="${WIN_CXXFLAGS}" ;
 	if [ $? -ne 0 ] ; then
